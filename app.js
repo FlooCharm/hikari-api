@@ -10,6 +10,11 @@ require('dotenv').config({ path: '.env' });
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 
+mongoose.connect(process.env.DB_URL, { 
+	useFindAndModify: false,
+	useNewUrlParser: true,
+	useUnifiedTopology: true
+});
 const app = express();
 
 app.use(cors());
