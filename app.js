@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 require('dotenv').config({ path: '.env' });
 
 const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
 
 mongoose.connect(process.env.DB_URL, { 
 	useFindAndModify: false,
@@ -25,7 +24,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 app.use((error, req, res, next) => {
 	if(error) {
