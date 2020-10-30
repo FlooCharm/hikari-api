@@ -9,6 +9,9 @@ const HomeSchema = new mongoose.Schema({
 	},
 	isLightOn: {
 		type: Boolean
+	},
+	isManual: {
+		type: Boolean
 	}
 })
 
