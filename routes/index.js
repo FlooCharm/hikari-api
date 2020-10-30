@@ -113,7 +113,6 @@ router.put('/update-data', verifyToken, function(req, res, next) {
 
 // Authorization
 function verifyToken(req, res, next) {
-	console.log('req', req)
 	const bearerHeader = req.headers['authorization']
 	if (!bearerHeader) return next({ status: 401, message: 'No token provided', name: 'Unauthorized'})
 	let token = bearerHeader.split(' ');
