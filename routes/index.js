@@ -3,11 +3,11 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/user');
-const Token = require('../models/token');
+const Home = require('../models/home');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Hikari' });
 });
 
 // Login
@@ -25,14 +25,18 @@ router.post('/login', (req, res, next) => {
 				result.comparePass(body.password, function(err, isMatch) {
 					if(err) throw(err);
 					if(isMatch) {
-						let access_token = generateAccessToken({ result })
-						let refresh_token = jwt.sign({ result }, process.env.REFRESH_TOKEN_SECRET)
-						Token.create({
-							access_token,
-							refresh_token
-						}).then((token) => {
-							res.status(200).json(token);
-						}).catch(next)
+						jwt.sign(
+							{ result },
+							'secretKey',
+							{ expiresIn: '9999 years' },
+							(err, accessToken) => {
+								if(err) next({
+									message: "Invalid operation",
+									name: 'Forbidden'
+								});
+								res.status(200).json({ accessToken });
+							}
+						)
 					}
 					else
 						res.status(401).json({
@@ -52,36 +56,75 @@ router.post('/login', (req, res, next) => {
 		.catch(next);
 })
 
-// POST token
-router.post('/token', function(req, res, next) {
-	const refresh_token = req.body.token;
-	if(!refresh_token) return res.status(401).json({ name: 'Unauthorized', message: 'Invalid token' })
-	Token.findOne({
-		refresh_token
-	}).then((result) => {
-		if(!result) return res.status(403).json({ name: 'Forbidden', message: 'Invalid token' })
-		
-		jwt.verify(refresh_token, process.env.REFRESH_TOKEN_SECRET, (err, authData) => {
-			if(err) return res.status(401).send({ error: err });
-			const access_token = generateAccessToken({ result: authData.result })
-			const refresh_token = jwt.sign({ result: authData.result }, process.env.REFRESH_TOKEN_SECRET)
-			Token.create({
-				access_token,
-				refresh_token
-			}).then(token => {
-				return res.status(200).send(token)
-			}).catch(next)
+// GET home data
+router.get('/:id/data', verifyToken, function(req, res, next) {
+	Home.findById(req.params.id)
+		.then(result => {
+			if(result)
+				res.status(200).json({
+					data: result
+				});
+			else
+				res.status(404).send('Data not found');
 		})
-	})
-
+		.catch(next)
 })
 
-function generateAccessToken(user) {
-	return jwt.sign(
-		user,
-		process.env.ACCESS_TOKEN_SECRET,
-		{ expiresIn: '2h' },
-	)
+// POST home data
+router.post('/home', verifyToken, function(req, res, next) {
+	const body = req.body;
+
+	Home.create(body)
+		.then(result => {
+			if(result)
+				res.status(200).json({
+					data: result
+				})
+			else
+				next({
+					message: "Can't register data",
+					name: 'Invalid'
+				})
+		})
+		.catch(next);
+})
+
+// UPDATE home data
+router.put('/:id/update-data', verifyToken, function(req, res, next) {
+	const body = req.body;
+	const id = req.params.id;
+
+	Home.findByIdAndUpdate(id, body, { new: true })
+		.then(result => {
+			if(result)
+				res.status(201).json({
+					data: result
+				})
+			else
+				next({
+					message: "Can't update data",
+					name: 'Invalid'
+				})
+		})
+		.catch(next);
+})
+
+// Authorization
+function verifyToken(req, res, next) {
+	const bearerHeader = req.headers['authorization']
+	if (!bearerHeader) return next({ status: 401, message: 'No token provided', name: 'Unauthorized'})
+	let token = bearerHeader.split(' ');
+
+	if(token && token[1]) {
+		req.token = token[1];
+		next();
+	} else {
+		next({
+			status: 401,
+			message: 'Invalid token',
+			name: 'Forbidden'
+		})
+	}
 }
 
 module.exports = router;
