@@ -13,6 +13,8 @@ router.get('/', function(req, res, next) {
 // Login
 router.post('/login', (req, res, next) => {
 	const body = req.body;
+	console.log('req', req);
+	console.log('body', body);
 
 	if(!body.username || !body.password) return next({
 		status: 401,
@@ -57,8 +59,10 @@ router.post('/login', (req, res, next) => {
 })
 
 // GET home data
-router.get('/:id/data', verifyToken, function(req, res, next) {
-	Home.findById(req.params.id)
+router.get('/data', verifyToken, function(req, res, next) {
+	const id = process.env.HOME_ID;
+
+	Home.findById(id)
 		.then(result => {
 			if(result)
 				res.status(200).json({
@@ -90,9 +94,9 @@ router.post('/home', verifyToken, function(req, res, next) {
 })
 
 // UPDATE home data
-router.put('/:id/update-data', verifyToken, function(req, res, next) {
+router.put('/update-data', verifyToken, function(req, res, next) {
 	const body = req.body;
-	const id = req.params.id;
+	const id = process.env.HOME_ID;
 
 	Home.findByIdAndUpdate(id, body, { new: true })
 		.then(result => {
