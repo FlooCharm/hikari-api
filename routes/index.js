@@ -13,8 +13,6 @@ router.get('/', function(req, res, next) {
 // Login
 router.post('/login', (req, res, next) => {
 	const body = req.body;
-	console.log('req', req);
-	console.log('body', body);
 
 	if(!body.username || !body.password) return next({
 		status: 401,
@@ -115,6 +113,7 @@ router.put('/update-data', verifyToken, function(req, res, next) {
 
 // Authorization
 function verifyToken(req, res, next) {
+	console.log('req', req)
 	const bearerHeader = req.headers['authorization']
 	if (!bearerHeader) return next({ status: 401, message: 'No token provided', name: 'Unauthorized'})
 	let token = bearerHeader.split(' ');
