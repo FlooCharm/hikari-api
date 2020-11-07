@@ -63,9 +63,7 @@ router.get('/data', verifyToken, function(req, res, next) {
 	Home.findById(id)
 		.then(result => {
 			if(result)
-				res.status(200).json({
-					data: result
-				});
+				res.status(200).json(result);
 			else
 				res.status(404).send('Data not found');
 		})
