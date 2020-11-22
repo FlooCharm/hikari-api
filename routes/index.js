@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const moment = require('moment');
+
 const User = require('../models/user');
 const Home = require('../models/home');
 
@@ -60,10 +62,16 @@ router.post('/login', (req, res, next) => {
 router.get('/data', verifyToken, function(req, res, next) {
 	const id = process.env.HOME_ID;
 
+	const hour = moment().hour();
+
 	Home.findById(id)
 		.then(result => {
-			if(result)
-				res.status(200).json(result);
+			if(result){
+				let newResult = Object.assign(result, { 
+					isEarly: hour < 18 && hour > 8
+				});
+				res.status(200).json(newResult);
+			}
 			else
 				res.status(404).send('Data not found');
 		})

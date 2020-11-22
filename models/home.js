@@ -8,6 +8,7 @@ const HomeSchema = new mongoose.Schema({
 	rColor: Number,
 	gColor: Number,
 	bColor: Number,
+	isEarly: Boolean,
 	isFanOn: Boolean,
 	areBlindsOpen: Boolean
 })
