@@ -5,7 +5,9 @@ const HomeSchema = new mongoose.Schema({
 	light: Number,
 	temperature: Number,
 	lightIntensity: Number,
-	lightColor: String,
+	rColor: Number,
+	gColor: Number,
+	bColor: Number,
 	isFanOn: Boolean,
 	areBlindsOpen: Boolean
 })
